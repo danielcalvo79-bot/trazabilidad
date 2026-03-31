@@ -936,33 +936,44 @@ function addLineaProducto(data) {
     `<option value="${p.codigo}" ${data && data.descripcion && data.descripcion.toLowerCase().includes(p.nombre.toLowerCase().split(' ')[2] || '~~~') ? 'selected' : ''}>${p.nombre}</option>`
   ).join('');
 
-  // Try to auto-match product
+  // Auto-match product using marca + formato
   let matchedCodigo = '';
   if (data && data.descripcion) {
     const desc = data.descripcion.toLowerCase();
-    const match = state.productos.find(p => {
-      const n = p.nombre.toLowerCase();
-      if (desc.includes('100') && n.includes('100')) return true;
-      if (desc.includes('325') && n.includes('325')) return true;
-      if (desc.includes('50') && n.includes('50') && !n.includes('325') && !n.includes('925')) return true;
-      if (desc.includes('925') && n.includes('925')) return true;
-      if (desc.includes('erizo') && n.includes('erizo')) return true;
-      if (desc.includes('lomo') && n.includes('lomo')) return true;
-      if (desc.includes('salmon') && n.includes('salmon')) return true;
-      return false;
-    });
-    // Also check marca for calter vs dorada vs salmon
-    if (match) {
-      let codigo = match.codigo;
-      if (data.marca && data.descripcion.toLowerCase().includes('trucha')) {
-        const m = data.marca.toLowerCase();
-        const grams = desc.includes('100') ? '100' : desc.includes('325') ? '325' : desc.includes('50') ? '50' : desc.includes('925') ? '925' : '';
-        if (m.includes('calter') || m.includes('sin marca') === false) codigo = 'HTC' + grams || match.codigo;
-        else if (m.includes('dorada')) codigo = 'HTD' + grams || match.codigo;
-        else if (m.includes('salmon')) codigo = 'HS' + grams || match.codigo;
+    const marca = (data.marca || '').toLowerCase().trim();
+
+    // Determine formato (grams)
+    const grams = desc.includes('925') ? '925'
+      : desc.includes('325') ? '325'
+      : desc.includes('100') ? '100'
+      : desc.includes('50') ? '50'
+      : '';
+
+    // Determine product family based on description and marca
+    if (desc.includes('trucha') && !desc.includes('lomo')) {
+      // CALTER = marca "calter" => HTC
+      // SIN MARCA, vacío, o cualquier otra => HTD (Dorada)
+      if (marca === 'calter') {
+        matchedCodigo = 'HTC' + grams;
+      } else {
+        // sin marca, vacio, o cualquier otra marca => HTD
+        matchedCodigo = 'HTD' + grams;
       }
-      if (state.productos.find(p => p.codigo === codigo)) matchedCodigo = codigo;
-      else matchedCodigo = match.codigo;
+    } else if (desc.includes('salmon')) {
+      matchedCodigo = 'HS' + grams;
+    } else if (desc.includes('erizo')) {
+      matchedCodigo = 'ERIZO';
+    } else if (desc.includes('lomo') && desc.includes('2')) {
+      matchedCodigo = 'LT2000';
+    } else if (desc.includes('lomo')) {
+      matchedCodigo = 'LT450';
+    } else if (desc.includes('congel')) {
+      matchedCodigo = 'CONG';
+    }
+
+    // Verify product exists, otherwise fallback to first active
+    if (matchedCodigo && !state.productos.find(p => p.codigo === matchedCodigo && p.activo)) {
+      matchedCodigo = '';
     }
   }
 
