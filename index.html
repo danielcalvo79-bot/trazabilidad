@@ -665,7 +665,6 @@ let state = {
   albaranes: [],
 };
 let editIdx = null;
-let guardandoRemoto = false;
 
 function save() {
   // Always save productos locally (catalogue data)
@@ -675,27 +674,28 @@ function save() {
 }
 
 async function saveRemoto() {
-  if (guardandoRemoto) return;
-  guardandoRemoto = true;
+  // Never block - always save latest state
   try {
-    await Promise.all([
-      fetch(SHEETS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'guardar', albaranes: state.albaranes })
-      }),
-      fetch(SHEETS_URL, {
-        method: 'POST',
-        body: JSON.stringify({ action: 'guardarStock', stock: state.stockInicial })
-      })
-    ]);
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'guardar', albaranes: state.albaranes })
+    });
+    // Save stock separately, don't await
+    fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'guardarStock', stock: state.stockInicial })
+    }).catch(e => console.warn('Error guardando stock:', e));
   } catch(e) {
     console.warn('Error guardando en Google Sheets:', e);
-  } finally {
-    guardandoRemoto = false;
+    // Fallback to localStorage
+    localStorage.setItem('cal_albaranes', JSON.stringify(state.albaranes));
+    localStorage.setItem('cal_stockInicial', JSON.stringify(state.stockInicial));
   }
 }
 
 async function cargarRemoto() {
+  // Don't reload while processing a PDF queue - would overwrite current state
+  if (pdfQueue.length > 0) return;
   mostrarCargando(true);
   try {
     const [r1, r2] = await Promise.all([
@@ -708,7 +708,6 @@ async function cargarRemoto() {
     if (d2.stock) state.stockInicial = d2.stock;
   } catch(e) {
     console.warn('Error cargando desde Google Sheets:', e);
-    // Fallback to localStorage if available
     state.albaranes = JSON.parse(localStorage.getItem('cal_albaranes') || '[]');
     state.stockInicial = JSON.parse(localStorage.getItem('cal_stockInicial') || '{}');
   } finally {
