@@ -1789,54 +1789,50 @@ function generarInforme() {
     <div class="card">
       <div class="card-title">${titulo} — ${albs.length} albaranes</div>
       <div class="print-section-title">Resumen por Producto${hasta ? ' — Stock a ' + formatFecha(hasta) : ''}</div>
-      <div style="margin-bottom:1.5rem">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Stock (uds)</th>
-                <th>Vendidas (uds)</th>
-                <th>Stock (kg)</th>
-                <th>Vendidas (kg)</th>
-                <th>Valoración stock</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${secciones.map(sec => `
-                <tr style="background:#f0f4f0">
-                  <td colspan="6" style="font-weight:700;color:#1a3a6b;font-size:0.85rem;padding:6px 6px 2px">${sec.grupo}</td>
+
+      ${secciones.map(sec => `
+        <div style="margin-bottom:1.5rem">
+          <div style="font-weight:700;color:#1a3a6b;font-size:0.9rem;padding:0.4rem 0;border-bottom:2px solid #1a3a6b;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.04em">${sec.grupo}</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Uds vendidas</th>
+                  <th>Kg vendidos</th>
+                  <th>Uds stock</th>
+                  <th>Kg stock</th>
+                  <th>Valoración stock</th>
                 </tr>
+              </thead>
+              <tbody>
                 ${sec.filas.map(f => `<tr>
-                  <td style="padding-left:1.5rem;font-size:0.82rem">${f.nombre}</td>
-                  <td class="mono">${f.udsStock.toLocaleString()}</td>
+                  <td style="font-size:0.82rem">${f.nombre}</td>
                   <td class="mono">${f.udsVendidas.toLocaleString()}</td>
-                  <td class="mono">${f.kgStock.toFixed(1)}</td>
                   <td class="mono">${f.kgVendidos.toFixed(1)}</td>
+                  <td class="mono">${f.udsStock.toLocaleString()}</td>
+                  <td class="mono">${f.kgStock.toFixed(1)}</td>
                   <td class="mono">${f.valorStock.toFixed(2)} €</td>
                 </tr>`).join('')}
-                <tr style="border-top:1px solid #ccc;font-weight:600;background:#f9f9f9">
-                  <td style="font-size:0.82rem">Subtotal ${sec.grupo}</td>
-                  <td class="mono">${sec.subtotal.udsStock.toLocaleString()}</td>
+              </tbody>
+              <tfoot>
+                <tr style="border-top:1px solid #1a3a6b;font-weight:700;background:#f0f4f0">
+                  <td>Total ${sec.grupo}</td>
                   <td class="mono">${sec.subtotal.udsVendidas.toLocaleString()}</td>
-                  <td class="mono">${sec.subtotal.kgStock.toFixed(1)}</td>
-                  <td class="mono">${sec.subtotal.kgVendidos.toFixed(1)}</td>
+                  <td class="mono">${sec.subtotal.kgVendidos.toFixed(1)} kg</td>
+                  <td class="mono">${sec.subtotal.udsStock.toLocaleString()}</td>
+                  <td class="mono">${sec.subtotal.kgStock.toFixed(1)} kg</td>
                   <td class="mono">${sec.subtotal.valorStock.toFixed(2)} €</td>
                 </tr>
-              `).join('')}
-            </tbody>
-            <tfoot>
-              <tr style="border-top:2px solid #1a3a6b;font-weight:700;background:#e8f0e7">
-                <td>TOTAL GENERAL</td>
-                <td class="mono">—</td>
-                <td class="mono">—</td>
-                <td class="mono">${totalKgStock.toFixed(1)} kg</td>
-                <td class="mono">${totalKgVendidos.toFixed(1)} kg</td>
-                <td class="mono">${totalValorStock.toFixed(2)} €</td>
-              </tr>
-            </tfoot>
-          </table>
+              </tfoot>
+            </table>
+          </div>
         </div>
+      `).join('')}
+
+      <div style="margin-top:1.5rem;padding:0.75rem;background:#e8f0e7;border:1px solid #b5d4b2;border-radius:4px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-weight:700;color:#1a3a6b;font-size:0.95rem">VALORACIÓN TOTAL STOCK</span>
+        <span style="font-family:var(--mono);font-size:1.1rem;font-weight:700;color:#1a3a6b">${totalValorStock.toFixed(2)} €</span>
       </div>
     </div>`;
 
