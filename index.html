@@ -444,7 +444,6 @@
             <th>Fecha</th>
             <th>Cliente</th>
             <th>Productos</th>
-            <th>Uds Total</th>
             <th class="no-print">Acciones</th>
           </tr>
         </thead>
@@ -1142,9 +1141,10 @@ function registrarAlbaran() {
     if (!confirm('Hay líneas sin número de lote. ¿Continuar igualmente?')) return;
   }
 
-  // Check duplicate
+  // Block duplicate
   if (state.albaranes.find(a => a.albaran === albaran)) {
-    if (!confirm(`El albarán "${albaran}" ya está registrado. ¿Quieres registrarlo de todas formas?`)) return;
+    alert(`El albarán "${albaran}" ya está registrado. Si necesitas modificarlo, búscalo en el Listado y usa el botón Editar.`);
+    return;
   }
 
   const reg = { id: Date.now(), albaran, fecha, cliente, codigoCliente, lineas, registrado: new Date().toISOString() };
@@ -1253,7 +1253,6 @@ function renderTablaAlbaranes(filtrados) {
     return String(b.albaran).localeCompare(String(a.albaran), undefined, {numeric:true});
   });
   sorted.forEach(alb => {
-    const totalUds = alb.lineas.reduce((s, l) => s + (l.unidades || 0), 0);
     const prodsStr = alb.lineas.map(l => `${l.nombre || l.codigo}: <strong>${l.unidades}</strong> uds${l.lote ? ` <span class="badge badge-green">${l.lote}</span>` : ''}`).join('<br>');
     const tr = document.createElement('tr');
     tr.innerHTML = `
