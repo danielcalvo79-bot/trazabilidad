@@ -263,7 +263,7 @@
     .panel { display: block !important; }
     .panel:not(.active) { display: none !important; }
     body { background: #fff; font-size: 10pt; }
-    main { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
+    main { max-width: 100% !important; }
     .subtitle { display: none !important; }
     h2 { display: none !important; }
 
@@ -322,11 +322,7 @@
     }
 
     /* Page breaks */
-    .print-page-break {
-      page-break-before: always;
-      display: block;
-      height: 1cm;
-    }
+    .print-page-break { page-break-before: always; }
 
     .print-footer { display: none !important; }
 
