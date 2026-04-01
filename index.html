@@ -259,13 +259,13 @@
 
   /* PRINT */
   @media print {
-    @page { margin: 1.5cm 1.8cm; }
+    @page { margin: 2cm; }
 
     header, nav, .btn, .btn-row, .no-print { display: none !important; }
     .panel { display: block !important; }
     .panel:not(.active) { display: none !important; }
     body { background: #fff; font-size: 10pt; }
-    main { padding: 0 !important; max-width: 100% !important; }
+    main { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
     .subtitle { display: none !important; }
     h2 { display: none !important; }
 
@@ -325,14 +325,11 @@
     /* Page breaks */
     .print-page-break { page-break-before: always; }
 
-    /* Footer */
+    /* Footer - flows naturally at bottom of content, no fixed positioning */
     .print-footer {
       display: block !important;
-      position: fixed;
-      bottom: 0.8cm;
-      left: 1.8cm;
-      right: 1.8cm;
-      padding-top: 0.3rem;
+      margin-top: 1.5rem;
+      padding-top: 0.4rem;
       border-top: 1px solid #ccc;
       font-size: 7.5pt;
       color: #999;
