@@ -666,20 +666,20 @@ let state = {
 };
 let editIdx = null;
 
-function save() {
-  // Always save productos locally (catalogue data)
+function save(nuevoAlbaran) {
   localStorage.setItem('cal_productos', JSON.stringify(state.productos));
-  // Save albaranes and stock to Google Sheets
-  saveRemoto();
+  saveRemoto(nuevoAlbaran);
 }
 
-async function saveRemoto() {
-  // Never block - always save latest state
+async function saveRemoto(nuevoAlbaran) {
   try {
-    await fetch(SHEETS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'guardar', albaranes: state.albaranes })
-    });
+    if (nuevoAlbaran) {
+      // Only add the new albaran - no risk of duplicates
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'añadir', albaran: nuevoAlbaran })
+      });
+    }
     // Save stock separately, don't await
     fetch(SHEETS_URL, {
       method: 'POST',
@@ -687,9 +687,20 @@ async function saveRemoto() {
     }).catch(e => console.warn('Error guardando stock:', e));
   } catch(e) {
     console.warn('Error guardando en Google Sheets:', e);
-    // Fallback to localStorage
     localStorage.setItem('cal_albaranes', JSON.stringify(state.albaranes));
     localStorage.setItem('cal_stockInicial', JSON.stringify(state.stockInicial));
+  }
+}
+
+async function saveRemotoCompleto() {
+  // Full rewrite - use only when editing or deleting
+  try {
+    await fetch(SHEETS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'guardar', albaranes: state.albaranes })
+    });
+  } catch(e) {
+    console.warn('Error guardando completo:', e);
   }
 }
 
@@ -1138,7 +1149,7 @@ function registrarAlbaran() {
 
   const reg = { id: Date.now(), albaran, fecha, cliente, codigoCliente, lineas, registrado: new Date().toISOString() };
   state.albaranes.push(reg);
-  save();
+  save(reg);
 
   document.getElementById('formCard').style.display = 'none';
   document.getElementById('successCard').style.display = 'block';
@@ -1236,7 +1247,11 @@ function renderTablaAlbaranes(filtrados) {
   if (albs.length === 0) { empty.style.display = 'block'; return; }
   empty.style.display = 'none';
   
-  const sorted = [...albs].sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  const sorted = [...albs].sort((a,b) => {
+    const fd = new Date(b.fecha) - new Date(a.fecha);
+    if (fd !== 0) return fd;
+    return String(b.albaran).localeCompare(String(a.albaran), undefined, {numeric:true});
+  });
   sorted.forEach(alb => {
     const totalUds = alb.lineas.reduce((s, l) => s + (l.unidades || 0), 0);
     const prodsStr = alb.lineas.map(l => `${l.nombre || l.codigo}: <strong>${l.unidades}</strong> uds${l.lote ? ` <span class="badge badge-green">${l.lote}</span>` : ''}`).join('<br>');
@@ -1330,7 +1345,7 @@ function guardarEdicion() {
     }
   });
   alb.lineas = lineas;
-  save();
+  saveRemotoCompleto();
   cerrarModal();
   renderTablaAlbaranes();
   renderStockDisplay();
@@ -1339,7 +1354,7 @@ function guardarEdicion() {
 function eliminarAlbaranModal() {
   if (!confirm('¿Seguro que quieres eliminar este albarán? Se restaurará el stock.')) return;
   state.albaranes = state.albaranes.filter(a => a.id !== editIdx);
-  save();
+  saveRemotoCompleto();
   cerrarModal();
   renderTablaAlbaranes();
   renderStockDisplay();
@@ -1462,7 +1477,11 @@ function generarInforme() {
     return matchDesde && matchHasta && matchCliente && matchCodigo;
   });
 
-  albs = albs.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  albs = albs.sort((a,b) => {
+    const fd = new Date(a.fecha) - new Date(b.fecha);
+    if (fd !== 0) return fd;
+    return String(a.albaran).localeCompare(String(b.albaran), undefined, {numeric:true});
+  });
 
   const totalesProd = {};
   albs.forEach(a => {
