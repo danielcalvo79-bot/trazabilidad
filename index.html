@@ -262,7 +262,7 @@
     header, nav, .btn, .btn-row, .no-print { display: none !important; }
     .panel { display: block !important; }
     .panel:not(.active) { display: none !important; }
-    body { background: #fff; font-size: 10pt; margin-bottom: 1.5cm; }
+    body { background: #fff; font-size: 10pt; }
     main { padding: 0 !important; max-width: 100% !important; margin: 0 !important; }
     .subtitle { display: none !important; }
     h2 { display: none !important; }
@@ -321,27 +321,14 @@
       border-bottom: 1px solid #1a3a6b;
     }
 
-    /* Page breaks - add top margin for page 2+ */
-    .print-page-break { 
+    /* Page breaks */
+    .print-page-break {
       page-break-before: always;
-      padding-top: 0.5cm;
       display: block;
+      height: 1cm;
     }
 
-    /* Footer fixed at bottom of every page */
-    .print-footer {
-      display: block !important;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 0.3rem 1cm;
-      border-top: 1px solid #ccc;
-      font-size: 7.5pt;
-      color: #999;
-      text-align: right;
-      background: #fff;
-    }
+    .print-footer { display: none !important; }
 
     /* Table improvements */
     table { font-size: 9pt; width: 100%; }
