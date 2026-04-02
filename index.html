@@ -1340,7 +1340,7 @@ function addLineaProducto(data) {
     <input type="number" placeholder="Cajas" value="${data ? (data.cajas||'') : ''}" min="0" oninput="calcUnidades(${idx})">
     <input type="number" placeholder="Uds/Caja" value="${data ? (data.udsCaja||data.uds_caja||'') : ''}" min="0" oninput="calcUnidades(${idx})">
     <input type="number" placeholder="Unidades" value="${data ? (data.unidades||'') : ''}" min="0">
-    <input type="text" placeholder="Lote *" style="border-color:var(--warning)">
+    <input type="text" placeholder="Lote *" style="border-color:var(--warning);text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
     <button class="btn btn-secondary btn-small" onclick="document.getElementById('linea-${idx}').remove()">✕</button>
   `;
   container.appendChild(div);
@@ -1392,7 +1392,7 @@ function registrarAlbaran() {
     const cajas = parseFloat(inputs[0].value) || 0;
     const udsCaja = parseFloat(inputs[1].value) || 0;
     const unidades = parseInt(inputs[2].value) || 0;
-    const lote = inputs[3].value.trim();
+    const lote = inputs[3].value.trim().toUpperCase();
     if (unidades > 0) {
       const prod = state.productos.find(p => p.codigo === codigo);
       lineas.push({ codigo, nombre: prod ? prod.nombre : codigo, cajas, udsCaja, unidades, lote });
@@ -1613,7 +1613,7 @@ function abrirEditar(id) {
         <input type="number" id="el_cajas_${i}" value="${l.cajas||''}" placeholder="Cajas" min="0">
         <input type="number" id="el_udsc_${i}" value="${l.udsCaja||''}" placeholder="Uds/Caja" min="0">
         <input type="number" id="el_uds_${i}" value="${l.unidades||''}" placeholder="Unidades" min="0">
-        <input type="text" id="el_lote_${i}" value="${l.lote||''}" placeholder="Lote" style="border-color:var(--warning)">
+        <input type="text" id="el_lote_${i}" value="${l.lote||''}" placeholder="Lote" style="border-color:var(--warning);text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
         <button class="btn btn-secondary btn-small" onclick="document.getElementById('editlinea-${i}').remove()">✕</button>
       </div>`).join('')}
     </div>`;
